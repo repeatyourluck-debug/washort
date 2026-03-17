@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortlink Pro</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="ri-links-fill"></i>
+                <span>Shortlink Pro</span>
+            </div>
+            <nav>
+                <a href="#" class="active"><i class="ri-dashboard-line"></i> Dashboard</a>
+                <a href="#"><i class="ri-bar-chart-box-line"></i> Analytics</a>
+                <a href="#"><i class="ri-settings-4-line"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div>
+                    <h1>Dashboard</h1>
+                    <p class="subtitle">Manage your shortlinks and tracking</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('createModal')">
+                    <i class="ri-add-line"></i> Create New Link
+                </button>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon bg-blue"><i class="ri-links-line"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Links</h3>
+                        <h2 id="totalLinksCount">...</h2>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple"><i class="ri-cursor-fill"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Clicks</h3>
+                        <h2 id="totalClicksCount">...</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card table-card">
+                <div class="card-header">
+                    <h2>Recent Links</h2>
+                    <div class="search-box">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="searchInput" placeholder="Search links...">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Short Link</th>
+                                <th>Destination</th>
+                                <th>Clicks</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="linksTableBody">
+                            <!-- Populated by JS -->
+                            <tr><td colspan="5" class="text-center py-8">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create Shortlink</h2>
+                <button class="close-btn" onclick="closeModal('createModal')"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="linkForm" class="form-grid">
+                    <input type="hidden" id="linkId">
+                    
+                    <div class="form-group full-width">
+                        <label>Destination URL *</label>
+                        <input type="url" id="defaultUrl" placeholder="https://example.com/very/long/url" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Custom Slug (Optional)</label>
+                        <div class="input-prefix">
+                            <span>/</span>
+                            <input type="text" id="customSlug" placeholder="my-promo">
+                        </div>
+                    </div>
+
+                    <div class="form-separator">Open Graph / Meta Tags (Optional)</div>
+                    
+                    <div class="form-group full-width">
+                        <label>Custom Title</label>
+                        <input type="text" id="linkTitle" placeholder="Awesome Product Sale">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Custom Description</label>
+                        <textarea id="linkDescription" rows="2" placeholder="Get 50% off today..."></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Thumbnail Image URL</label>
+                        <input type="url" id="linkThumbnail" placeholder="https://example.com/image.jpg">
+                    </div>
+                    
+                    <div class="form-group full-width" style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <input type="checkbox" id="linkWaRedirect" style="width: auto; margin: 0; cursor: pointer;">
+                        <label for="linkWaRedirect" style="margin: 0; cursor: pointer;">Enable WhatsApp Style Redirect (2s delay)</label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('createModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="saveLinkBtn">Save Link</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Geo Rules Modal -->
+    <div class="modal-overlay" id="geoModal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2>Geo-Targeting Rules</h2>
+                <button class="close-btn" onclick="closeModal('geoModal')"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="subtitle mb-4">Redirect users based on their country. If no match, they go to the default destination.</p>
+                
+                <input type="hidden" id="geoLinkId">
+                
+                <form id="geoForm" class="geo-form mb-6">
+                    <div class="geo-inputs">
+                        <select id="geoCountry" required>
+                            <option value="">Select Country</option>
+                            <option value="ID">Indonesia</option>
+                            <option value="US">United States</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="SG">Singapore</option>
+                            <option value="MY">Malaysia</option>
+                            <option value="AU">Australia</option>
+                            <option value="IN">India</option>
+                            <option value="CA">Canada</option>
+                            <option value="PH">Philippines</option>
+                            <!-- Add more as needed -->
+                        </select>
+                        <input type="url" id="geoTargetUrl" placeholder="Target URL for this country" required>
+                        <button type="submit" class="btn btn-primary"><i class="ri-add-line"></i> Add</button>
+                    </div>
+                </form>
+
+                <div class="rules-list">
+                    <h4>Active Rules</h4>
+                    <table class="data-table mt-2">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Target URL</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="geoRulesTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div class="modal-overlay" id="analyticsModal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2>Click Analytics</h2>
+                <button class="close-btn" onclick="closeModal('analyticsModal')"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="analytics-grid">
+                    <div class="card bg-darker p-4 text-center">
+                        <h3 class="text-gray mb-2">Total Clicks</h3>
+                        <h1 id="analyticsTotalClicks" class="text-2xl font-bold text-accent">0</h1>
+                    </div>
+                    <div class="card bg-darker p-4">
+                        <h3 class="text-gray mb-4">Top Countries</h3>
+                        <div id="countryBreakdownList" class="country-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="mt-6 mb-4">Recent Clicks</h3>
+                <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Country</th>
+                                <th>IP</th>
+                                <th>Device</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentClicksTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Action successful</div>
+
+    <script src="app.js"></script>
+</body>
+</html>
